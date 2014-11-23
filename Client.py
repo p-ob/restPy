@@ -16,12 +16,30 @@ __author__ = 'Patrick O\'Brien'
     along with restPy.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import requests
+from Request import Request, QueryParameter, UrlParameter
 
 
 class Client:
-    def __init__(self, base):
+    def __init__(self, base: str):
         self.base = base
         self.request = None
+        self.url = ''
+        self.warnings = []
 
-    def execute(self, request):
+    def execute(self, request: Request):
         self.request = request
+        url = self.base + self.request.method
+        for p in self.request.parameters:
+            if isinstance(p, UrlParameter):
+                try:
+                    url = url.format(**{p.name: p.value})
+                except KeyError:
+                    self.warnings += ['{0} not a valid parameter'.format(p.name)]
+            if isinstance(p, QueryParameter):
+                if '?' in url.split('/')[-1]:
+                    url += '&{0}={1}'.format(p.name, p.value)
+                else:
+                    url += '?{0}={1}'.format(p.name, p.value)
+        self.url = url
+        return url
+

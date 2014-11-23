@@ -18,7 +18,7 @@ __author__ = 'Patrick O\'Brien'
 
 
 class Request:
-    def __init__(self, method):
+    def __init__(self, method: str):
         self.method = method
         self.parameters = []
 
@@ -32,7 +32,7 @@ class Request:
 class Parameter:
     def __init__(self, name, value):
         self.name = name
-        self.value = value
+        self.value = str(value)
 
 
 class UrlParameter(Parameter):

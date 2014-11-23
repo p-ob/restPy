@@ -29,17 +29,11 @@ class Client:
     def execute(self, request: Request):
         self.request = request
         url = self.base + self.request.method
+        payload = {}
         for p in self.request.parameters:
             if isinstance(p, UrlParameter):
-                try:
-                    url = url.format(**{p.name: p.value})
-                except KeyError:
-                    self.warnings += ['{0} not a valid parameter'.format(p.name)]
+                url = url.replace('{{{0}}}'.format(p.name), p.value)
             if isinstance(p, QueryParameter):
-                if '?' in url.split('/')[-1]:
-                    url += '&{0}={1}'.format(p.name, p.value)
-                else:
-                    url += '?{0}={1}'.format(p.name, p.value)
-        self.url = url
-        return url
-
+                payload[p.name] = p.value
+        r = requests.get(url, params=payload)
+        return r

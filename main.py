@@ -18,11 +18,11 @@ __author__ = 'Patrick O\'Brien'
 from Client import Client
 from Request import Request
 
-c = Client('www.example.com')
-r = Request('api/{test}')
-r.add_url_parameter('tes', 'na')
-r.add_query_parameter('test', 2)
-r.add_query_parameter('a', 1)
+c = Client("https://na.api.pvp.net/")
+r = Request("api/lol/{region}/v1.4/summoner/by-name/{summonerNames}")
+r.add_url_parameter('region', 'na')
+r.add_url_parameter('summonerNames', 'drunk7irishman')
+r.add_query_parameter('api_key', 'example')
 
 u = c.execute(r)
 print(u)

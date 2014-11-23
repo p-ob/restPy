@@ -32,7 +32,7 @@ class Client:
         payload = {}
         for p in self.request.parameters:
             if isinstance(p, UrlParameter):
-                url = url.replace('{{{0}}}'.format(p.name), p.value)
+                url = url.replace('{{{0}}}'.format(p.name), p.value) # .format() does not allow for partial formatting
             if isinstance(p, QueryParameter):
                 payload[p.name] = p.value
         r = requests.get(url, params=payload)

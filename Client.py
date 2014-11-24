@@ -25,6 +25,7 @@ class Client:
         self.request = None
         self.url = ''
         self.warnings = []
+        self.data = None
 
     def execute(self, request: Request) -> requests.Request:
         self.request = request
@@ -36,13 +37,34 @@ class Client:
             if isinstance(p, QueryParameter):
                 payload[p.name] = p.value
         r = requests.get(url, params=payload)
+        self.data = r.content
         return r
 
-    def execute_with_return_type(self, request: Request, class_type):
-        class TemplateClass:
-            pass
-        if not isinstance(class_type, type(TemplateClass)):
-            raise Exception("Not a valid input for class_type. See documentation.")
+    def execute_with_return_struct(self, request: Request):
         r = self.execute(request)
+        content_type = r.headers["content-type"]
+        if 'json' in content_type:
+            self.data = self.json2object(r.json())
+        elif 'xml' in content_type:
+            self.data = self.__xml2object(r.data)
+        else:
+            self.data = r.data
+        return self.data
+
+    def json2object(self, json_data):
+        s = Struct(**json_data)
+        data_members = (x for x in s.__dir__() if '__' not in x)
+        for data_member in data_members:
+            if isinstance(eval('s.{0}'.format(data_member)), dict):
+                exec('s.{0} = self.json2object(s.{0})'.format(data_member))
+
+        return s
+
+    @staticmethod
+    def __xml2object(content):
+        return content
 
 
+class Struct:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)

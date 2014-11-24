@@ -18,11 +18,14 @@ __author__ = 'Patrick O\'Brien'
 from Client import Client
 from Request import Request
 
+with open('key.txt') as f:
+    key = f.read()
+
 c = Client("https://na.api.pvp.net/")
 r = Request("api/lol/{region}/v1.4/summoner/by-name/{summonerNames}")
 r.add_url_parameter('region', 'na')
 r.add_url_parameter('summonerNames', 'drunk7irishman')
-r.add_query_parameter('api_key', 'example')
+r.add_query_parameter('api_key', key)
 
-u = c.execute(r)
+u = c.execute_with_return_struct(r)
 print(u)

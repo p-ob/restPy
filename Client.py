@@ -15,7 +15,7 @@ __author__ = 'Patrick O\'Brien'
     You should have received a copy of the GNU General Public License
     along with restPy.  If not, see <http://www.gnu.org/licenses/>.
 '''
-import requests
+import requests, types
 from Request import Request, QueryParameter, UrlParameter
 
 
@@ -26,14 +26,23 @@ class Client:
         self.url = ''
         self.warnings = []
 
-    def execute(self, request: Request):
+    def execute(self, request: Request) -> requests.Request:
         self.request = request
         url = self.base + self.request.method
         payload = {}
         for p in self.request.parameters:
             if isinstance(p, UrlParameter):
-                url = url.replace('{{{0}}}'.format(p.name), p.value) # .format() does not allow for partial formatting
+                url = url.replace('{{{0}}}'.format(p.name), p.value)  # .format() does not allow for partial formatting
             if isinstance(p, QueryParameter):
                 payload[p.name] = p.value
         r = requests.get(url, params=payload)
         return r
+
+    def execute_with_return_type(self, request: Request, class_type):
+        class TemplateClass:
+            pass
+        if not isinstance(class_type, type(TemplateClass)):
+            raise Exception("Not a valid input for class_type. See documentation.")
+        r = self.execute(request)
+
+

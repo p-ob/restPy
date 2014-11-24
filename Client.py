@@ -55,7 +55,7 @@ class Client:
         s = Struct(**json_data)
         data_members = (x for x in s.__dir__() if '__' not in x)
         for data_member in data_members:
-            if isinstance(eval('s.{0}'.format(data_member)), dict):
+            if isinstance(getattr(s, data_member, None), dict):
                 setattr(s, data_member, self.json2object(getattr(s, data_member)))
 
         return s

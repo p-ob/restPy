@@ -56,7 +56,7 @@ class Client:
         data_members = (x for x in s.__dir__() if '__' not in x)
         for data_member in data_members:
             if isinstance(eval('s.{0}'.format(data_member)), dict):
-                exec('s.{0} = self.json2object(s.{0})'.format(data_member))
+                setattr(s, data_member, self.json2object(eval('s.{0}'.format(data_member))))
 
         return s
 

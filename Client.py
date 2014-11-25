@@ -15,7 +15,9 @@ __author__ = 'Patrick O\'Brien'
     You should have received a copy of the GNU General Public License
     along with restPy.  If not, see <http://www.gnu.org/licenses/>.
 '''
-import requests, types
+import requests
+import os
+import pickle
 from Request import Request, QueryParameter, UrlParameter
 
 
@@ -40,23 +42,35 @@ class Client:
         self.data = r.content
         return r
 
-    def execute_with_return_struct(self, request: Request):
+    def execute_with_return_struct(self, request: Request, write_struct_to_txt: bool=False, txt_filename: str='', txt_folder: str=''):
         r = self.execute(request)
         content_type = r.headers["content-type"]
         if 'json' in content_type:
-            self.data = self.json2object(r.json())
+            self.data = self.__json2object(r.json())
+            if write_struct_to_txt:
+                if txt_filename is '':
+                    file_number = 0
+                    txt_filename = 'struct{0}.txt'
+                    while os.path.isfile(txt_folder + txt_filename.format(file_number)):
+                        file_number += 1
+                    txt_filename = txt_filename.format(file_number)
+            if '.txt' not in txt_filename:
+                txt_filename += '.txt'
+            with open(txt_folder + txt_filename, 'wb') as f:
+                pickle.dump(self.data, f, pickle.HIGHEST_PROTOCOL)
+
         elif 'xml' in content_type:
             self.data = self.__xml2object(r.data)
         else:
             self.data = r.data
         return self.data
 
-    def json2object(self, json_data):
+    def __json2object(self, json_data):
         s = Struct(**json_data)
-        data_members = (x for x in s.__dir__() if '__' not in x)
+        data_members = (d for d in s.__dir__() if '__' not in d)
         for data_member in data_members:
             if isinstance(getattr(s, data_member, None), dict):
-                setattr(s, data_member, self.json2object(getattr(s, data_member)))
+                setattr(s, data_member, self.__json2object(getattr(s, data_member)))
 
         return s
 

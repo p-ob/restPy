@@ -41,8 +41,7 @@ class Client:
                 payload[p.name] = p.value
         r = requests.get(url, params=payload)
         self.data = r.content
-        if r.status_code != 200:
-            raise Exception("Error in making API call.")
+        r.raise_for_status()
         return r
 
     def execute_with_return_struct(self, request: Request, write_struct_to_txt: bool=False, txt_filename: str='',

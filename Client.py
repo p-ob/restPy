@@ -19,7 +19,7 @@ import requests
 import os
 import pickle
 import xmltodict
-from Request import Request, QueryParameter, UrlParameter
+from .Request import Request, QueryParameter, UrlParameter
 
 
 class Client:
@@ -41,6 +41,8 @@ class Client:
                 payload[p.name] = p.value
         r = requests.get(url, params=payload)
         self.data = r.content
+        if r.status_code != 200:
+            raise Exception("Error in making API call.")
         return r
 
     def execute_with_return_struct(self, request: Request, write_struct_to_txt: bool=False, txt_filename: str='',
@@ -65,6 +67,7 @@ class Client:
                 txt_filename += '.txt'
             with open(txt_folder + txt_filename, 'wb') as f:
                 pickle.dump(self.data, f, pickle.HIGHEST_PROTOCOL)
+
         if return_data_members and isinstance(self.data, Struct):
             return self.data, self.__get_data_members(self.data)
         return self.data
@@ -77,10 +80,6 @@ class Client:
                 setattr(s, data_member, self.__dict2object(getattr(s, data_member)))
 
         return s
-
-    @staticmethod
-    def __xml2object(content):
-        return content
 
     def __get_data_members(self, struct):
         data_members = [d for d in struct.__dir__() if '__' not in d]

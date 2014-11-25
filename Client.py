@@ -68,26 +68,31 @@ class Client:
                 pickle.dump(self.data, f, pickle.HIGHEST_PROTOCOL)
 
         if return_data_members and isinstance(self.data, Struct):
-            return self.data, self.__get_data_members(self.data)
+            return self.data, self.data.get_data_members()
         return self.data
 
     def __dict2object(self, json_data):
         s = Struct(**json_data)
-        data_members = (d for d in s.__dir__() if '__' not in d)
+        data_members = [d for d in s.__dir__() if '__' not in d]
         for data_member in data_members:
             if isinstance(getattr(s, data_member, None), dict):
                 setattr(s, data_member, self.__dict2object(getattr(s, data_member)))
+            elif isinstance(getattr(s, data_member, None), list):
+                for i in range(0, len(getattr(s, data_member, None))):
+                    if isinstance(getattr(s, data_member, None)[i], dict):
+                        getattr(s, data_member)[i] = self.__dict2object(getattr(s, data_member)[i])
 
         return s
-
-    def __get_data_members(self, struct):
-        data_members = [d for d in struct.__dir__() if '__' not in d]
-        for i in range(0, len(data_members)):
-            if isinstance(getattr(struct, data_members[i], None), Struct):
-                data_members[i] = {data_members[i]: self.__get_data_members(getattr(struct, data_members[i]))}
-        return data_members
 
 
 class Struct:
     def __init__(self, **entries):
         self.__dict__.update(entries)
+
+    def get_data_members(self):
+        data_members = [d for d in self.__dir__() if '__' not in d and d != 'get_data_members']
+
+        for i in range(0, len(data_members)):
+            if isinstance(getattr(self, data_members[i], None), Struct):
+                data_members[i] = {data_members[i]: getattr(self, data_members[i]).get_data_members()}
+        return data_members

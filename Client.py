@@ -65,7 +65,7 @@ class Client:
         else:
             self.data = r.data
         if return_data_members and isinstance(self.data, Struct):
-            return self.data, self.__struct_to_str(self.data)
+            return self.data, self.__get_data_members(self.data)
         return self.data
 
     def __json2object(self, json_data):
@@ -81,11 +81,11 @@ class Client:
     def __xml2object(content):
         return content
 
-    def __struct_to_str(self, struct):
+    def __get_data_members(self, struct):
         data_members = [d for d in struct.__dir__() if '__' not in d]
         for i in range(0, len(data_members)):
             if isinstance(getattr(struct, data_members[i], None), Struct):
-                data_members[i] = {data_members[i]: self.__struct_to_str(getattr(struct, data_members[i]))}
+                data_members[i] = {data_members[i]: self.__get_data_members(getattr(struct, data_members[i]))}
         return data_members
 
 

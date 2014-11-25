@@ -27,5 +27,5 @@ r.add_url_parameter('region', 'na')
 r.add_url_parameter('summonerNames', 'drunk7irishman')
 r.add_query_parameter('api_key', key)
 
-u = c.execute_with_return_struct(r, write_struct_to_txt=True)
+u = c.execute_with_return_struct(r, return_data_members=True)
 print(u)

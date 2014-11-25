@@ -55,10 +55,10 @@ class Client:
                     while os.path.isfile(txt_folder + txt_filename.format(file_number)):
                         file_number += 1
                     txt_filename = txt_filename.format(file_number)
-            if '.txt' not in txt_filename:
-                txt_filename += '.txt'
-            with open(txt_folder + txt_filename, 'wb') as f:
-                pickle.dump(self.data, f, pickle.HIGHEST_PROTOCOL)
+                if '.txt' not in txt_filename:
+                    txt_filename += '.txt'
+                with open(txt_folder + txt_filename, 'wb') as f:
+                    pickle.dump(self.data, f, pickle.HIGHEST_PROTOCOL)
 
         elif 'xml' in content_type:
             self.data = self.__xml2object(r.data)

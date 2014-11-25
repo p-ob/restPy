@@ -42,7 +42,8 @@ class Client:
         self.data = r.content
         return r
 
-    def execute_with_return_struct(self, request: Request, write_struct_to_txt: bool=False, txt_filename: str='', txt_folder: str=''):
+    def execute_with_return_struct(self, request: Request, write_struct_to_txt: bool=False, txt_filename: str='',
+                                   txt_folder: str='', return_data_members: bool=False):
         r = self.execute(request)
         content_type = r.headers["content-type"]
         if 'json' in content_type:
@@ -63,6 +64,8 @@ class Client:
             self.data = self.__xml2object(r.data)
         else:
             self.data = r.data
+        if return_data_members and isinstance(self.data, Struct):
+            return self.data, self.__struct_to_str(self.data)
         return self.data
 
     def __json2object(self, json_data):
@@ -77,6 +80,13 @@ class Client:
     @staticmethod
     def __xml2object(content):
         return content
+
+    def __struct_to_str(self, struct):
+        data_members = [d for d in struct.__dir__() if '__' not in d]
+        for i in range(0, len(data_members)):
+            if isinstance(getattr(struct, data_members[i], None), Struct):
+                data_members[i] = {data_members[i]: self.__struct_to_str(getattr(struct, data_members[i]))}
+        return data_members
 
 
 class Struct:

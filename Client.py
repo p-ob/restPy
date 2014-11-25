@@ -18,6 +18,7 @@ __author__ = 'Patrick O\'Brien'
 import requests
 import os
 import pickle
+import xmltodict
 from Request import Request, QueryParameter, UrlParameter
 
 
@@ -47,33 +48,33 @@ class Client:
         r = self.execute(request)
         content_type = r.headers["content-type"]
         if 'json' in content_type:
-            self.data = self.__json2object(r.json())
-            if write_struct_to_txt:
-                if txt_filename is '':
-                    file_number = 0
-                    txt_filename = 'struct{0}.txt'
-                    while os.path.isfile(txt_folder + txt_filename.format(file_number)):
-                        file_number += 1
-                    txt_filename = txt_filename.format(file_number)
-                if '.txt' not in txt_filename:
-                    txt_filename += '.txt'
-                with open(txt_folder + txt_filename, 'wb') as f:
-                    pickle.dump(self.data, f, pickle.HIGHEST_PROTOCOL)
-
+            self.data = self.__dict2object(r.json())
         elif 'xml' in content_type:
-            self.data = self.__xml2object(r.data)
+            self.data = self.__dict2object(xmltodict.parse(r.data))
         else:
             self.data = r.data
+
+        if write_struct_to_txt and isinstance(self.data, Struct):
+            if txt_filename is '':
+                file_number = 0
+                txt_filename = 'struct{0}.txt'
+                while os.path.isfile(txt_folder + txt_filename.format(file_number)):
+                    file_number += 1
+                txt_filename = txt_filename.format(file_number)
+            if '.txt' not in txt_filename:
+                txt_filename += '.txt'
+            with open(txt_folder + txt_filename, 'wb') as f:
+                pickle.dump(self.data, f, pickle.HIGHEST_PROTOCOL)
         if return_data_members and isinstance(self.data, Struct):
             return self.data, self.__get_data_members(self.data)
         return self.data
 
-    def __json2object(self, json_data):
+    def __dict2object(self, json_data):
         s = Struct(**json_data)
         data_members = (d for d in s.__dir__() if '__' not in d)
         for data_member in data_members:
             if isinstance(getattr(s, data_member, None), dict):
-                setattr(s, data_member, self.__json2object(getattr(s, data_member)))
+                setattr(s, data_member, self.__dict2object(getattr(s, data_member)))
 
         return s
 

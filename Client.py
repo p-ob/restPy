@@ -37,7 +37,7 @@ class Client:
         for p in self.request.parameters:
             if isinstance(p, UrlParameter):
                 url = url.replace('{{{0}}}'.format(p.name), p.value)  # .format() does not allow for partial formatting
-            if isinstance(p, QueryParameter):
+            elif isinstance(p, QueryParameter):
                 payload[p.name] = p.value
         r = requests.get(url, params=payload)
         self.data = r.content
@@ -91,8 +91,10 @@ class Struct:
 
     def get_data_members(self):
         data_members = [d for d in self.__dir__() if '__' not in d and d != 'get_data_members']
-
+        '''
+        # commented out code below would yield ALL data_members for all Structs contained by this Struct
         for i in range(0, len(data_members)):
             if isinstance(getattr(self, data_members[i], None), Struct):
                 data_members[i] = {data_members[i]: getattr(self, data_members[i]).get_data_members()}
+        '''
         return data_members

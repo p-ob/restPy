@@ -15,10 +15,12 @@ __author__ = 'Patrick O\'Brien'
     You should have received a copy of the GNU General Public License
     along with restPy.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from .METHOD import METHOD
 
 
 class Request:
-    def __init__(self, method: str):
+    def __init__(self, resource: str, method: METHOD=METHOD.GET):
+        self.resource = resource
         self.method = method
         self.parameters = []
 

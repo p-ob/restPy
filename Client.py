@@ -20,6 +20,11 @@ import os
 import pickle
 import xmltodict
 from .Request import Request, QueryParameter, UrlParameter
+from .METHOD import METHOD
+
+
+class ClientException(Exception):
+    pass
 
 
 class Client:
@@ -32,16 +37,40 @@ class Client:
 
     def execute(self, request: Request) -> requests.Request:
         self.request = request
-        url = self.base + self.request.method
+        url = self.base + self.request.resource
         payload = {}
         for p in self.request.parameters:
             if isinstance(p, UrlParameter):
                 url = url.replace('{{{0}}}'.format(p.name), p.value)  # .format() does not allow for partial formatting
             elif isinstance(p, QueryParameter):
                 payload[p.name] = p.value
-        r = requests.get(url, params=payload)
-        self.data = r.content
-        r.raise_for_status()
+        if request.method == METHOD.GET:
+            r = requests.get(url, params=payload)
+            self.data = r.content
+            r.raise_for_status()
+        elif request.method == METHOD.PUT:
+            r = requests.put(url, params=payload)
+            self.data = r.content
+            r.raise_for_status()
+        elif request.method == METHOD.POST:
+            r = requests.post(url, params=payload)
+            self.data = r.content
+            r.raise_for_status()
+        elif request.method == METHOD.DELETE:
+            r = requests.delete(url, params=payload)
+            self.data = r.content
+            r.raise_for_status()
+        elif request.method == METHOD.HEAD:
+            r = requests.head(url, params=payload)
+            self.data = r.content
+            r.raise_for_status()
+        elif request.method == METHOD.OPTIONS:
+            r = requests.options(url, params=payload)
+            self.data = r.content
+            r.raise_for_status()
+        else:
+            raise ClientException("No valid method given for request.")
+
         return r
 
     def execute_with_return_struct(self, request: Request, write_struct_to_txt: bool=False, txt_filename: str='',

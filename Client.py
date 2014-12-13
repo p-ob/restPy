@@ -47,30 +47,25 @@ class Client:
         if request.method == METHOD.GET:
             r = requests.get(url, params=payload)
             self.data = r.content
-            r.raise_for_status()
         elif request.method == METHOD.PUT:
             r = requests.put(url, params=payload)
             self.data = r.content
-            r.raise_for_status()
         elif request.method == METHOD.POST:
             r = requests.post(url, params=payload)
             self.data = r.content
-            r.raise_for_status()
         elif request.method == METHOD.DELETE:
             r = requests.delete(url, params=payload)
             self.data = r.content
-            r.raise_for_status()
         elif request.method == METHOD.HEAD:
             r = requests.head(url, params=payload)
             self.data = r.content
-            r.raise_for_status()
         elif request.method == METHOD.OPTIONS:
             r = requests.options(url, params=payload)
             self.data = r.content
-            r.raise_for_status()
         else:
             raise ClientException("No valid method given for request.")
 
+        r.raise_for_status()
         return r
 
     def execute_with_return_struct(self, request: Request, write_struct_to_txt: bool=False, txt_filename: str='',

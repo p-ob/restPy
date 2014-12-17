@@ -113,6 +113,10 @@ class Struct:
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
+    def __repr__(self):
+        data_members = self.get_data_members()
+        return str([(data_member, getattr(self, data_member, None)) for data_member in data_members])
+
     def get_data_members(self):
         data_members = [d for d in self.__dir__() if '__' not in d and d != 'get_data_members']
         '''

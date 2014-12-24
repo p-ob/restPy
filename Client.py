@@ -97,7 +97,7 @@ class Client:
 
     def __dict2object(self, json_data):
         s = Struct(**json_data)
-        data_members = [d for d in s.__dir__() if '__' not in d]
+        data_members = s.get_data_members()
         for data_member in data_members:
             if isinstance(getattr(s, data_member, None), dict):
                 setattr(s, data_member, self.__dict2object(getattr(s, data_member)))
@@ -114,8 +114,7 @@ class Struct:
         self.__dict__.update(entries)
 
     def __repr__(self):
-        data_members = self.get_data_members()
-        return str([(data_member, getattr(self, data_member, None)) for data_member in data_members])
+        return str([(data_member, getattr(self, data_member, None)) for data_member in self.get_data_members()])
 
     def get_data_members(self):
         data_members = [d for d in self.__dir__() if '__' not in d and d != 'get_data_members']

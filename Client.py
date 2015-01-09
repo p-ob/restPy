@@ -35,7 +35,7 @@ class Client:
         self.warnings = []
         self.data = None
 
-    def execute(self, request: Request) -> requests.Request:
+    def execute(self, request: Request) -> requests.request:
         self.request = request
         url = self.base + self.request.resource
         payload = {}
